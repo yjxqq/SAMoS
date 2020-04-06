@@ -93,6 +93,10 @@
 #include "pair_ljrod_potential.hpp"
 #include "pair_soft_attractive_potential.hpp"
 #include "pair_vertex_particle_potential.hpp"
+
+// My changes
+#include "my_pair_vertex_particle_potential.hpp"
+
 #include "pair_line_tension_potential.hpp"
 #include "pair_boundary_bending_potential.hpp"
 #include "pair_boundary_attraction_potential.hpp"

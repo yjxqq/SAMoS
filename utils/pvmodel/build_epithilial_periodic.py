@@ -75,9 +75,9 @@ class Plane:
     def __init__(self, Lx, Ly, N, v, bpacking):
         self.L = (Lx,Ly)
         self.N = N
-        self.buff = 0.5
+        self.buff = 1.0/bpacking # Ly*bpacking mode 3 gets 0
         self.bpacking = bpacking
-        self.Nbound = int(round( (Lx + self.buff) * (Ly + self.buff)/(1/bpacking) ))
+        self.Nbound = int(round( (Lx + self.buff) * (Ly + self.buff)/(1/bpacking) )) #useless ???
         self.particles = [Particle(i) for i in range(N)]
         # self.boundparticles = [Particle(i, 2) for i in range(N, N + self.Nbound)]
         self.__generate_pos()
@@ -87,18 +87,32 @@ class Plane:
         self.Nt = self.N + len(self.boundparticles)
 
     def __generate_pos(self):
-        for i in range(self.N):
+        for i in range(self.N/3):
             x = uniform(-0.5*self.L[0],0.5*self.L[0])
-            y = uniform(-0.5*self.L[1],0.5*self.L[1])
+            y = uniform(-0.5*self.L[1]/3.,0.5*self.L[1]/3.)
             z = 0
             self.particles[i].r = [x,y,z]
+	    print(self.N/3)
+        for i in range(self.N/3, 2*self.N/3):
+            x = self.particles[i-self.N/3].r[0]
+            y = self.particles[i-self.N/3].r[1]+self.L[1]/3.
+            z= 0
+	    self.particles[i].r = [x,y,z]
+            # print(x)
+        for i in range(2*self.N/3,3*self.N/3):
+            x = self.particles[i-2*self.N/3].r[0]
+            y = self.particles[i-2*self.N/3].r[1]-self.L[1]/3.
+            z= 0
+	    self.particles[i].r = [x,y,z]
+
+
 
     def __generate_posbound(self):
         lx, ly = self.L
         lx, ly = lx/2., ly/2.
 
-        Nlinex = int(round( (lx + 2*self.buff) / (1/self.bpacking) ) )
-        Nliney = int(round( (ly + 2*self.buff) / (1/self.bpacking) ) )
+        Nlinex = int(1+round( (2*lx + 2*self.buff) *self.bpacking ) )
+        Nliney = int(1+round( (2*ly + 2*self.buff) *self.bpacking ) )
         
         rvals = []
         xline = np.linspace(-lx-self.buff, lx+self.buff, Nlinex, True)
@@ -306,7 +320,7 @@ if __name__=='__main__':
     #args.N = int(round((args.lx * args.ly)/args.area))
     # N for circle
     if args.type == 'Plane':
-        args.N = int(round((args.lx * args.ly)/args.area))
+        args.N = 3*int(round((args.lx * args.ly/3.)/args.area))
     elif args.type == 'Circle':
         args.N = int(round(args.L**2 )) # An individual particle has area pi R^2 = 4 pi
 

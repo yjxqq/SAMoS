@@ -51,6 +51,10 @@ void register_pair_potentials(PairPotentialMap& pair_potentials)
   pair_potentials["soft_attractive"] = factory<PairSoftAttractivePotentialPtr>();
   // Register vertex particle pair potential for tissues with the pair potentials class factory
   pair_potentials["vp"] = factory<PairVertexParticlePotentialPtr>();
+
+  //My changes
+  pair_potentials["my_vp"] = factory<MyPairVertexParticlePotentialPtr>();
+
   // Register line tension pair potential for tissues with the pair potentials class factory
   pair_potentials["line_tension"] = factory<PairLineTensionPotentialPtr>();
   // Register boundary bending pair potential for tissues with the pair potentials class factory

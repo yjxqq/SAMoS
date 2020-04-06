@@ -42,7 +42,17 @@ void ExternalSelfPropulsion::compute()
     {
       if (m_has_params)
         alpha = m_type_params[p.get_type()-1]["alpha"];
-      p.fx += alpha*p.nx;
+      // MY CHANGES
+      /*
+      double altered_leng_r = sqrt((p.nx+4.0)*(p.nx+4.0)+p.ny*p.ny+p.nz*p.nz);
+      double altered_leng_l = sqrt((p.nx-4.0)*(p.nx-4.0)+p.ny*p.ny+p.nz*p.nz);
+      double intensify = 5.0;
+      if (p.x > -45.5 && (p.y > -5.0 && p.y < 5.0))
+          p.fx += intensify*alpha*(p.nx+4.0)/altered_leng_r;
+      else if (p.x < -74.5 && (p.y > -5.0 && p.y < 5.0))
+          p.fx += intensify*alpha*(p.nx-4.0)/altered_leng_l;
+      else //END OF MY CHANGES */
+          p.fx += alpha*p.nx;
       p.fy += alpha*p.ny;
       p.fz += alpha*p.nz;
     }

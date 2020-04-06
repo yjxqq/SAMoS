@@ -28,8 +28,8 @@
  * \brief Declaration of PairVertexParticlePotential class
  */ 
 
-#ifndef __PAIR_VERTEX_PARTICLE_POTENTIAL_HPP__
-#define __PAIR_VERTEX_PARTICLE_POTENTIAL_HPP__
+#ifndef __MY_PAIR_VERTEX_PARTICLE_POTENTIAL_HPP__
+#define __MY_PAIR_VERTEX_PARTICLE_POTENTIAL_HPP__
 
 #include <cmath>
 
@@ -39,7 +39,7 @@ using std::make_pair;
 using std::sqrt;
 
 //! Structure that handles parameters for the vertex-particle pair potential
-struct VertexParticleParameters
+struct MyVertexParticleParameters
 {
   double K;
   double gamma;
@@ -49,7 +49,7 @@ struct VertexParticleParameters
 /*! PairVertexParticlePotential implements the vertex-particle model for an active tissue model.
  *  \todo Document the force.
  */
-class PairVertexParticlePotential : public PairPotential
+class MyPairVertexParticlePotential : public PairPotential
 {
 public:
   
@@ -59,7 +59,7 @@ public:
   //! \param nlist Pointer to the global neighbour list
   //! \param val Value control object (for phasing in)
   //! \param param Contains information about all parameters (k)
-  PairVertexParticlePotential(SystemPtr sys, MessengerPtr msg, NeighbourListPtr nlist, ValuePtr val, pairs_type& param) : PairPotential(sys, msg, nlist, val, param), m_has_part_params(false), m_include_boundary(false)
+  MyPairVertexParticlePotential(SystemPtr sys, MessengerPtr msg, NeighbourListPtr nlist, ValuePtr val, pairs_type& param) : PairPotential(sys, msg, nlist, val, param), m_has_part_params(false), m_include_boundary(false)
   {
     m_known_params.push_back("K");
     m_known_params.push_back("gamma");
@@ -146,7 +146,7 @@ public:
       m_msg->write_config("potential.pair.vertex_particle.include_boundary","false");
     }
     
-    m_particle_params = new VertexParticleParameters[m_ntypes];
+    m_particle_params = new MyVertexParticleParameters[m_ntypes];
     for (int i = 0; i < m_ntypes; i++)
     {
       m_particle_params[i].K = m_K;
@@ -154,10 +154,10 @@ public:
       m_particle_params[i].lambda = m_lambda;
     }
     
-    m_pair_params = new VertexParticleParameters*[m_ntypes];
+    m_pair_params = new MyVertexParticleParameters*[m_ntypes];
     for (int i = 0; i < m_ntypes; i++)
     {
-      m_pair_params[i] = new VertexParticleParameters[m_ntypes];
+      m_pair_params[i] = new MyVertexParticleParameters[m_ntypes];
       for (int j = 0; j < m_ntypes; j++)
       {
         m_pair_params[i][j].K = m_K;
@@ -168,7 +168,7 @@ public:
     
   }
   
-  virtual ~PairVertexParticlePotential()
+  virtual ~MyPairVertexParticlePotential()
   {
     for (int i = 0; i < m_ntypes; i++)
       delete [] m_pair_params[i];
@@ -285,11 +285,11 @@ private:
   bool m_has_part_params;           //!< true if type specific particle parameters are given
   int m_mesh_update_steps;          //!< number of time steps between mesh (tessalation) recalculation
   bool m_include_boundary;          //!< if true, include boudary terms in force calculation
-  VertexParticleParameters*  m_particle_params;   //!< type specific particle parameters 
-  VertexParticleParameters** m_pair_params;       //!< type specific pair parameters 
+  MyVertexParticleParameters*  m_particle_params;   //!< type specific particle parameters 
+  MyVertexParticleParameters** m_pair_params;       //!< type specific pair parameters 
      
 };
 
-typedef shared_ptr<PairVertexParticlePotential> PairVertexParticlePotentialPtr;
+typedef shared_ptr<MyPairVertexParticlePotential> MyPairVertexParticlePotentialPtr;
 
 #endif

@@ -1,3 +1,5 @@
 build/
 *.pyc
 .*.swp
+My_tests/*
+doc/journal.pcbi.1005569.s020/*

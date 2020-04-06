@@ -101,9 +101,9 @@ void PairVertexParticlePotential::compute(double dt)
         Face& f_nu   = mesh.get_faces()[fid];
         Face& f_nu_p = mesh.get_faces()[fid_p];
          
-        Vector3d& r_nu_m = f_nu_m.rc; 
-        Vector3d& r_nu   = f_nu.rc; 
-        Vector3d& r_nu_p = f_nu_p.rc; 
+        Vector3d& r_nu_m = f_nu_m.rc;
+        Vector3d& r_nu   = f_nu.rc;
+        Vector3d& r_nu_p = f_nu_p.rc;
         
         Vector3d cross_prod_1(0.0,0.0,0.0);
         if (!(f_nu.is_hole || f_nu_p.is_hole)) cross_prod_1 = (cross(r_nu_p, Nvec))*f_nu.get_jacobian(i);
@@ -175,7 +175,7 @@ void PairVertexParticlePotential::compute(double dt)
         Vector3d perim_vec(0.0,0.0,0.0);
         Vector3d con_vec(0.0,0.0,0.0);
         Vector3d Nvec = Vector3d(pj.Nx, pj.Ny, pj.Nz);
-        
+
         for (int f = 0; f < vj.n_faces; f++)
         {
           int fid = vj.dual[f];
@@ -194,7 +194,7 @@ void PairVertexParticlePotential::compute(double dt)
             if (!(f_nu.is_hole || f_nu_p.is_hole)) cross_prod_1 = cross(r_nu_p, Nvec)*f_nu.get_jacobian(i);
             if (!(f_nu_m.is_hole || f_nu.is_hole)) cross_prod_1 = cross_prod_1 - cross(r_nu_m, Nvec)*f_nu.get_jacobian(i);
             area_vec = area_vec + cross_prod_1; 
-            
+
             Vector3d cross_prod_2(0.0,0.0,0.0);
             if (!(f_nu_m.is_hole || f_nu.is_hole)) cross_prod_2 = ((r_nu - r_nu_m).unit())*f_nu.get_jacobian(i);
             if (!(f_nu_p.is_hole || f_nu.is_hole)) cross_prod_2 -= ((r_nu_p - r_nu).unit())*f_nu.get_jacobian(i);

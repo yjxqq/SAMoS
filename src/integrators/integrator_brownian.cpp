@@ -105,6 +105,7 @@ void IntegratorBrownian::integrate()
       p.y += sqrt_dt*fr_y;
       p.z += sqrt_dt*fr_z;
     }
+
     // Project everything back to the manifold
     m_constrainer->enforce(p);
     // Update angular velocity
@@ -115,10 +116,179 @@ void IntegratorBrownian::integrate()
     //double dtheta = m_dt*m_constraint->project_torque(p) + m_stoch_coeff*m_rng->gauss_rng(1.0);
     m_constrainer->rotate_director(p,dtheta);
     if (m_velocity)
-      m_constrainer->rotate_velocity(p,dtheta);  
+      m_constrainer->rotate_velocity(p,dtheta);
     //p.omega = dtheta*m_dt;
     p.age += m_dt;
   }
+
+  // My changes
+  bool periodic_update = true;
+  bool update_boundary = false;
+  if (periodic_update)
+  {
+      double length_period = 30.0;
+      double bpacking = 2.0;
+      double x_lenghth = 50.0;
+      int internal_index_start = 0;
+      int internal_index_end = 499;
+      int up_internal_index_start = internal_index_end+1;
+      int up_internal_index_end = up_internal_index_start+(internal_index_end-internal_index_start);
+      int down_internal_index_start = up_internal_index_end+1;
+      int down_internal_index_end = down_internal_index_start+(internal_index_end-internal_index_start);
+
+      int right_boundary_start = int(internal_index_end+length_period*bpacking);
+      int right_boundary_end = int(internal_index_end+2*length_period*bpacking);
+      int left_boundary_start = int(internal_index_end+4*length_period*bpacking+2*x_lenghth*bpacking);
+      int left_boundary_end = int(internal_index_end+5*length_period*bpacking+2*x_lenghth*bpacking);
+      int boundary_periodic_update_region = 30;
+
+      // right boundary start and end index
+      for (int i =right_boundary_start-boundary_periodic_update_region; i < right_boundary_start+boundary_periodic_update_region; i++)
+      {
+          int pi = particles[i];
+          Particle& p = m_system->get_particle(pi);
+
+          if (p.y<=length_period/2.0)
+          {
+              right_boundary_start=i;
+              break;
+          }
+      }
+      for (int i =right_boundary_end-boundary_periodic_update_region; i < right_boundary_end+boundary_periodic_update_region; i++)
+      {
+          int pi = particles[i];
+          Particle& p = m_system->get_particle(pi);
+
+          if (p.y<=-length_period/2.0)
+          {
+              right_boundary_end=i;
+              break;
+          }
+      }
+      Particle& p1 = m_system->get_particle(particles[right_boundary_start]);
+      Particle& p2 = m_system->get_particle(particles[right_boundary_end]);
+      if (abs(p1.y-p2.y)<0.001)
+          right_boundary_end -= 1;
+      // left boundary start and end index
+      for (int i =left_boundary_start-boundary_periodic_update_region; i < left_boundary_start+boundary_periodic_update_region; i++)
+      {
+          int pi = particles[i];
+          Particle& p = m_system->get_particle(pi);
+
+          if (p.y>=-length_period/2.0)
+          {
+              left_boundary_start=i;
+              break;
+          }
+      }
+      for (int i =left_boundary_end-boundary_periodic_update_region; i < left_boundary_end+boundary_periodic_update_region; i++)
+      {
+          int pi = particles[i];
+          Particle& p = m_system->get_particle(pi);
+
+          if (p.y>=length_period/2.0)
+          {
+              left_boundary_end=i;
+              break;
+          }
+      }
+      Particle& p3 = m_system->get_particle(particles[left_boundary_start]);
+      Particle& p4 = m_system->get_particle(particles[left_boundary_end]);
+      if (abs(p4.y-p3.y)<0.001)
+          left_boundary_end -= 1;
+
+      // boundary periodic update region start and end index
+      int right_up_boundary_end= right_boundary_start+1;
+      int right_up_boundary_start = right_up_boundary_end-boundary_periodic_update_region+1;
+      int right_down_boundary_start= right_boundary_end+1;
+      int right_down_boundary_end = right_down_boundary_start+boundary_periodic_update_region-1;
+
+      int left_up_boundary_start = left_boundary_end+1;
+      int left_up_boundary_end = left_up_boundary_start+boundary_periodic_update_region-1;
+      int left_down_boundary_end = left_boundary_start-1;
+      int left_down_boundary_start = left_down_boundary_end-boundary_periodic_update_region+1;
+
+      // periodic Update
+      for (int i = up_internal_index_start; i < up_internal_index_end+1; i++)
+      {
+          int pi0 = particles[i-(up_internal_index_start-internal_index_start)];
+          Particle& p0 = m_system->get_particle(pi0);
+          int pi = particles[i];
+          Particle& p = m_system->get_particle(pi);
+
+          p.x = p0.x;
+          p.y = p0.y+length_period;
+          p.z = p0.z;
+
+      }
+
+      for (int i = down_internal_index_start; i < down_internal_index_end+1; i++)
+      {
+          int pi0 = particles[i-(down_internal_index_start-internal_index_start)];
+          Particle& p0 = m_system->get_particle(pi0);
+          int pi = particles[i];
+          Particle& p = m_system->get_particle(pi);
+
+          p.x = p0.x;
+          p.y = p0.y-length_period;
+          p.z = p0.z;
+
+      }
+        if (update_boundary)
+        {
+            // right boundary
+            for (int i = right_up_boundary_start; i < right_up_boundary_end + 1; i++)
+            {
+                int pi0 = particles[i + (right_boundary_end - right_boundary_start + 1)];
+                Particle& p0 = m_system->get_particle(pi0);
+                int pi = particles[i];
+                Particle& p = m_system->get_particle(pi);
+
+                p.x = p0.x;
+                p.y = p0.y + length_period;
+                p.z = p0.z;
+
+            }
+            for (int i = right_down_boundary_start; i < right_down_boundary_end + 1; i++)
+            {
+                int pi0 = particles[i - (right_boundary_end - right_boundary_start + 1)];
+                Particle& p0 = m_system->get_particle(pi0);
+                int pi = particles[i];
+                Particle& p = m_system->get_particle(pi);
+
+                p.x = p0.x;
+                p.y = p0.y - length_period;
+                p.z = p0.z;
+
+            }
+            // left boundary
+            for (int i = left_up_boundary_start; i < left_up_boundary_end + 1; i++)
+            {
+                int pi0 = particles[i - (left_boundary_end - left_boundary_start + 1)];
+                Particle& p0 = m_system->get_particle(pi0);
+                int pi = particles[i];
+                Particle& p = m_system->get_particle(pi);
+
+                p.x = p0.x;
+                p.y = p0.y + length_period;
+                p.z = p0.z;
+
+            }
+            for (int i = left_down_boundary_start; i < left_down_boundary_end + 1; i++)
+            {
+                int pi0 = particles[i + (left_boundary_end - left_boundary_start + 1)];
+                Particle& p0 = m_system->get_particle(pi0);
+                int pi = particles[i];
+                Particle& p = m_system->get_particle(pi);
+
+                p.x = p0.x;
+                p.y = p0.y - length_period;
+                p.z = p0.z;
+
+            }
+        }
+  }        // end of my changes
+
   // Update vertex mesh
   m_system->update_mesh();
 }
